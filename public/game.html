@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smash Web - Game</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body style="background:black; color:white; margin:0;">
+  <canvas id="gameCanvas" width="800" height="600" style="display:block; margin:0 auto; background:#333;"></canvas>
+  <script>
+    const socket = io();
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let players = {};
+
+    socket.on("playerInput", (data) => {
+      if (!players[data.id]) {
+        players[data.id] = { x: 100, y: 100 };
+      }
+      if (data.action === "left") players[data.id].x -= 5;
+      if (data.action === "right") players[data.id].x += 5;
+      if (data.action === "up") players[data.id].y -= 5;
+      if (data.action === "down") players[data.id].y += 5;
+    });
+
+    socket.on("playerDisconnected", (id) => {
+      delete players[id];
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let id in players) {
+        ctx.fillStyle = "lime";
+        ctx.fillRect(players[id].x, players[id].y, 40, 40);
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>
